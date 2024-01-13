@@ -1,7 +1,9 @@
 package ru.geekbrains.springboothomework2;
 
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,7 +13,7 @@ import java.util.List;
 public class StudentController {
     private final StudentRepository repository;
 
-    @Autowired
+
     public StudentController(StudentRepository repository) {
         this.repository = repository;
     }
@@ -31,20 +33,20 @@ public class StudentController {
         return repository.getByName(name);
     }
 
-    @GetMapping
-    public Student getByGroupName(@RequestParam String groupName) {
+    @GetMapping("/group/{groupName}/student")
+    public List<Student> getByGroupName(@PathVariable String groupName) {
         return repository.getByGroupName(groupName);
     }
 
-    @DeleteMapping("/del/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteById(@PathVariable long id) {
-        repository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable long id) {
+        boolean result = repository.deleteById(id);
+        return result ? new ResponseEntity<>(HttpStatus.OK) : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void insertStudent(@RequestBody StudentRecord request) {
-        repository.insertStudent(request.name(), request.groupName());
+    public ResponseEntity<String> insertStudent(@RequestBody StudentRecord request) {
+        boolean result = repository.insertStudent(request.name(), request.groupName());
+        return result ? new ResponseEntity<>(HttpStatus.CREATED) : new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
